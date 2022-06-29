@@ -150,6 +150,9 @@ export class MindmapComponent implements AfterViewInit {
 
     // links
     function diagonal(s: any, d: any) {
+      //if (s.x < d.x) {
+      //  s.x = d.x + s.x;
+      //}
       let path = `M ${s.y} ${s.x}
          C ${(s.y + d.y) / 2} ${s.x}
            ${(s.y + d.y) / 2} ${d.x}
@@ -211,10 +214,11 @@ export class MindmapComponent implements AfterViewInit {
       name: 'abcd',
     } as IMindMapData;
 
-    var newNode = D3.hierarchy(newData, function (d) {
+    let newNode: any = D3.hierarchy(newData, function (d) {
       return d.children;
     });
     newNode.parent = this.currentSelected;
+    newNode.depth = this.currentSelected.depth + 1;
     if (this.currentSelected && !this.currentSelected.data.children) {
       this.currentSelected.data.children = [];
       this.currentSelected.children = [];
