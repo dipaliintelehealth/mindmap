@@ -27,6 +27,8 @@ export class MindmapComponent implements AfterViewInit {
   private treemap!: any;
   private root: any;
   private currentSelected: any;
+  isShown: boolean = false;
+  nodeName!: string;
   constructor(private dataService: MindmapService) {}
 
   ngAfterViewInit() {
@@ -41,9 +43,9 @@ export class MindmapComponent implements AfterViewInit {
     });
   }
   private setup(): void {
-    this.margin = { top: 10, right: 120, bottom: 10, left: 40 };
-    this.width = 960 - this.margin.left - this.margin.right;
-    this.height = 500 - this.margin.top - this.margin.bottom;
+    this.margin = { top: 10, right: 10, bottom: 10, left: 40 };
+    this.width = 1200 - this.margin.left - this.margin.right;
+    this.height = 400 - this.margin.top - this.margin.bottom;
   }
   private buildSVG(): void {
     this.host.html('');
@@ -225,6 +227,18 @@ export class MindmapComponent implements AfterViewInit {
     }
     this.currentSelected.children.push(newNode);
     this.currentSelected.data.children.push(newNode.data);
+    this.update(this.currentSelected);
+  }
+  EditNode(): void {
+    this.isShown = true;
+    this.nodeName = this.currentSelected.data.name;
+    console.log(this.nodeName);
+  }
+  DeleteNode(): void {}
+
+  onSave(): void {
+    this.isShown = false;
+    this.currentSelected.data.name = this.nodeName;
     this.update(this.currentSelected);
   }
 }
