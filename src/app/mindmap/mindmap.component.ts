@@ -8,6 +8,7 @@ import {
 import { IMindMapData } from '../Interfaces/mindmap-interface';
 import { MindmapService } from '../services/mindmap.service';
 import * as D3 from 'd3';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-mindmap',
@@ -29,6 +30,9 @@ export class MindmapComponent implements AfterViewInit {
   private currentSelected: any;
   isShown: boolean = false;
   nodeName!: string;
+  jsonData!: any;
+  sanitizer!: any;
+  downloadJsonHref!: any;
   constructor(private dataService: MindmapService) {}
 
   ngAfterViewInit() {
@@ -152,9 +156,6 @@ export class MindmapComponent implements AfterViewInit {
 
     // links
     function diagonal(s: any, d: any) {
-      //if (s.x < d.x) {
-      //  s.x = d.x + s.x;
-      //}
       let path = `M ${s.y} ${s.x}
          C ${(s.y + d.y) / 2} ${s.x}
            ${(s.y + d.y) / 2} ${d.x}
@@ -229,16 +230,43 @@ export class MindmapComponent implements AfterViewInit {
     this.currentSelected.data.children.push(newNode.data);
     this.update(this.currentSelected);
   }
-  EditNode(): void {
+  editNode(): void {
     this.isShown = true;
     this.nodeName = this.currentSelected.data.name;
     console.log(this.nodeName);
   }
-  DeleteNode(): void {}
+  deleteNode(): void {
+    this.currentSelected.deleteNode;
+    //this.update(this.currentSelected);
+  }
 
   onSave(): void {
     this.isShown = false;
     this.currentSelected.data.name = this.nodeName;
     this.update(this.currentSelected);
+  }
+
+  hierarchyToJson(root: any): any {
+    if (root) {
+      let data = {
+        name: root.data.name,
+        children: Array<any>(),
+      };
+      if (root.children) {
+        root.children.forEach((child: any) => {
+          data.children.push(this.hierarchyToJson(child));
+        });
+      }
+      return data;
+    }
+    return null;
+  }
+  getJsonData(): void {
+    let exportData = this.hierarchyToJson(this.root);
+    console.log('hierarchy', JSON.stringify(exportData));
+    return saveAs(
+      new Blob([JSON.stringify(exportData, null, 2)], { type: 'JSON' }),
+      'sample.json'
+    );
   }
 }

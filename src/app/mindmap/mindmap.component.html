@@ -6,11 +6,18 @@
     <button id="btnAdd" class="btn btn-primary me-2 col" (click)="addNode()">
       Add
     </button>
-    <button id="btnEdit" class="btn btn-primary me-2 col" (click)="EditNode()">
+    <button id="btnEdit" class="btn btn-primary me-2 col" (click)="editNode()">
       Edit
     </button>
-    <button id="btnDelete" class="btn btn-primary col" (click)="DeleteNode()">
+    <button
+      id="btnDelete"
+      class="btn btn-primary me-2 col"
+      (click)="deleteNode()"
+    >
       Delete
+    </button>
+    <button id="btnJson" class="btn btn-primary col" (click)="getJsonData()">
+      GetJson
     </button>
   </div>
   <div class="row" *ngIf="isShown" id="divshow">
