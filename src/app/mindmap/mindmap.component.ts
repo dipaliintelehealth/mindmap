@@ -49,7 +49,7 @@ export class MindmapComponent implements AfterViewInit {
   private setup(): void {
     this.margin = { top: 10, right: 10, bottom: 10, left: 40 };
     this.width = 1200 - this.margin.left - this.margin.right;
-    this.height = 400 - this.margin.top - this.margin.bottom;
+    this.height = 1200 - this.margin.top - this.margin.bottom;
   }
   private buildSVG(): void {
     this.host.html('');
@@ -116,13 +116,13 @@ export class MindmapComponent implements AfterViewInit {
       .append('text')
       .attr('dy', '.35em')
       .attr('x', function (d: any) {
-        return d.children || d._children ? -13 : 13;
+        return d.options || d._children ? -13 : 13;
       })
       .attr('text-anchor', function (d: any) {
-        return d.children || d._children ? 'end' : 'start';
+        return d.options || d._children ? 'end' : 'start';
       })
       .text(function (d: any) {
-        return d.data ? d.data.name : d.name;
+        return d.data ? d.data.text : d.name;
       });
 
     var nodeUpdate = nodeEnter.merge(node);
@@ -214,7 +214,7 @@ export class MindmapComponent implements AfterViewInit {
   }
   addNode(): void {
     let newData = {
-      name: 'abcd',
+      topic: 'abcd',
     } as IMindMapData;
 
     let newNode: any = D3.hierarchy(newData, function (d) {
@@ -236,13 +236,20 @@ export class MindmapComponent implements AfterViewInit {
     console.log(this.nodeName);
   }
   deleteNode(): void {
-    this.currentSelected.deleteNode;
-    //this.update(this.currentSelected);
+    let parent = this.currentSelected.parent;
+    if (parent && parent.children && parent.children.length > 0) {
+      parent.children = parent.children.filter(
+        (value: any, index: number, array: Array<any>) =>
+          value.data.name !== this.currentSelected.data.name
+      );
+      this.update(parent);
+    }
   }
 
-  onSave(): void {
+  onEditSave(): void {
     this.isShown = false;
     this.currentSelected.data.name = this.nodeName;
+    this.currentSelected.name = this.nodeName;
     this.update(this.currentSelected);
   }
 

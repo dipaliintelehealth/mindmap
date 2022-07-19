@@ -32,7 +32,10 @@
               
             ],
             "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+              "node_modules/jsmind/js/jsmind.js",
+              "node_modules/jsmind/js/jsmind.draggable.js",
+              "node_modules/jsmind/js/jsmind.screenshot.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,

@@ -1,139 +1,27 @@
-import { Component, OnInit } from '@angular/core';
-import { customizeUtil, MindMapMain } from 'angular-mindmap';
-
-const HIERARCHY_RULES = {
-  ROOT: {
-    name: 'root',
-    backgroundColor: '#7EC6E1',
-    getChildren: () => [
-      HIERARCHY_RULES.SALES_MANAGER,
-      HIERARCHY_RULES.SHOW_ROOM,
-      HIERARCHY_RULES.SALES_TEAM,
-    ],
-  },
-  SALES_MANAGER: {
-    name: 'Manager',
-    color: '#fff',
-    backgroundColor: '#616161',
-    getChildren: () => [HIERARCHY_RULES.SHOW_ROOM, HIERARCHY_RULES.SALES_TEAM],
-  },
-  SHOW_ROOM: {
-    name: 'Room',
-    color: '#fff',
-    backgroundColor: '#989898',
-    getChildren: () => [HIERARCHY_RULES.SALES_TEAM],
-  },
-  SALES_TEAM: {
-    name: 'Team',
-    color: '#fff',
-    backgroundColor: '#C6C6C6',
-    getChildren: () => [],
-  },
-};
-
-const option = {
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { MindmapService } from '../services/mindmap.service';
+declare var jsMind: any;
+const options = {
   container: 'jsmind_container',
-  theme: 'normal',
+  theme: 'greensea',
   editable: true,
-  depth: 15,
-  hierarchyRule: HIERARCHY_RULES,
-};
-
-const mind = {
-  format: 'nodeTree',
-  data: {
-    id: 43,
-    topic: 'Manager and room',
-    selectedType: false,
-    backgroundColor: '#7EC6E1',
-    children: [
-      {
-        id: 80,
-        color: '#fff',
-        topic: 'show room',
-        direction: 'right',
-        selectedType: false,
-        backgroundColor: '#616161',
-        children: [],
-      },
-      {
-        id: 44,
-        color: '#fff',
-        topic: 'Manager',
-        direction: 'right',
-        selectedType: false,
-        backgroundColor: '#616161',
-        children: [
-          {
-            id: 46,
-            color: '#fff',
-            topic: 'Room 1',
-            direction: 'right',
-            selectedType: false,
-            backgroundColor: '#989898',
-            children: [
-              {
-                id: 49,
-                color: '#fff',
-                topic: 'TeamC',
-                direction: 'right',
-                selectedType: false,
-                backgroundColor: '#C6C6C6',
-                children: [],
-              },
-              {
-                id: 51,
-                color: '#fff',
-                topic: 'AMG 1',
-                direction: 'right',
-                selectedType: false,
-                backgroundColor: '#C6C6C6',
-                children: [],
-              },
-              {
-                id: 47,
-                color: '#fff',
-                topic: 'TeamA',
-                direction: 'right',
-                selectedType: false,
-                backgroundColor: '#C6C6C6',
-                children: [],
-              },
-              {
-                id: 48,
-                color: '#fff',
-                topic: 'TeamB',
-                direction: 'right',
-                selectedType: false,
-                backgroundColor: '#C6C6C6',
-                children: [],
-              },
-              {
-                id: 50,
-                color: '#fff',
-                topic: 'TeamD',
-                direction: 'right',
-                selectedType: false,
-                backgroundColor: '#C6C6C6',
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 45,
-        color: '#fff',
-        topic: 'Smart app',
-        direction: 'right',
-        selectedType: false,
-        backgroundColor: '#616161',
-        children: [],
-      },
-    ],
+  mode: 'side',
+  support_html: true, // Does it support HTML elements in the node?
+  view: {
+    engine: 'canvas', // engine for drawing lines between nodes in the mindmap
+    hmargin: 100, // Minimum horizontal distance of the mindmap from the outer frame of the container
+    vmargin: 50, // Minimum vertical distance of the mindmap from the outer frame of the container
+    line_width: 1, // thickness of the mindmap line
+    line_color: '#555', // Thought mindmap line color
+    draggable: false, // Drag the mind map with your mouse, when it's larger that the container
+    hide_scrollbars_when_draggable: false, // Hide container scrollbars, when mind map is larger than container and draggable option is true.
+  },
+  layout: {
+    hspace: 100, // horizontal spacing between nodes
+    vspace: 20, // vertical spacing between nodes
+    pspace: 13, // Horizontal spacing between node and connection line (to place node expander)
   },
 };
-
 @Component({
   selector: 'app-jsmind',
   templateUrl: './jsmind.component.html',
@@ -142,33 +30,39 @@ const mind = {
 export class JsmindComponent implements OnInit {
   mindMap: any;
   title = 'example-angular10';
-  constructor() {}
+  constructor(private dataService: MindmapService) {}
 
   ngOnInit() {
-    this.mindMap = MindMapMain.show(option, mind);
+    this.mindMap = new jsMind(options);
   }
-  removeNode() {
-    const selectedNode = this.mindMap.getSelectedNode();
-    const selectedId = selectedNode && selectedNode.id;
-
-    if (!selectedId) {
-      return;
-    }
-    this.mindMap.removeNode(selectedId);
+  ngAfterViewInit() {
+    this.dataService.$data.subscribe((data) => {
+      var mind = {
+        meta: {
+          name: 'jsMind remote',
+          author: 'hizzgdev@163.com',
+          version: '0.2',
+        },
+        format: 'node_tree',
+        data: data,
+      };
+      this.mindMap.show(mind);
+    });
   }
-
   addNode() {
-    const selectedNode = this.mindMap.getSelectedNode();
-    if (!selectedNode) {
-      return;
-    }
-
-    const nodeId = customizeUtil.uuid.newid();
-    this.mindMap.addNode(selectedNode, nodeId);
+    let selectedNode = this.mindMap.get_selected_node();
+    let id = Math.random();
+    this.mindMap.add_node(selectedNode, id, 'abcd', {});
   }
 
-  getMindMapData() {
-    const data = this.mindMap.getData().data;
-    console.log('data: ', data);
+  deleteNode() {
+    let selectedNode = this.mindMap.get_selected_node();
+    this.mindMap.remove_node(selectedNode);
+  }
+  getJsonData() {
+    var mind_data = this.mindMap.get_data('node_tree');
+    var mind_name = mind_data.meta.name;
+    var mind_str = jsMind.util.json.json2string(mind_data);
+    jsMind.util.file.save(mind_str, 'text/json', mind_name + '.json');
   }
 }
